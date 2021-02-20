@@ -8,6 +8,6 @@ project(MyOpenGl)
 
 string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror")
 
-add_executable(main src/main.cpp "TGA library/tgaimage.cpp" "TGA library/tgaimage.h")
+add_executable(main src/main.cpp "TGA library/tgaimage.cpp" "TGA library/tgaimage.h" "src/point2i.cpp" "include/point2i.h")
 
 target_include_directories(main PUBLIC "include" "src" "TGA library")
