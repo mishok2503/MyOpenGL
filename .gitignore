@@ -1,0 +1,8 @@
+main
+*.out
+CMakeCache.txt
+*.cmake
+*.exe
+Makefile
+CMakeFiles/
+out/
