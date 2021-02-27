@@ -1,27 +1,26 @@
 #include "tgaimage.h"
 
 #include <iostream>
+#include "vector.h"
 #include "point3d.h"
 
 int main()
 {
-	Point3d a, b(3, 4, 5.5);
+	Vector2i a(1, 2);
 
-	auto print = [&]()
+	auto print = [](auto v)
 	{
-		std::cout << "a: " << a.x << ' ' << a.y << ' ' << a.z << '\n';
-		std::cout << "b: " << b.x << ' ' << b.y << ' ' << b.z << '\n';
+		for (size_t i=0; i < v.size(); ++i)
+			std::cout << v[i] << ' ';
+		std::cout << '\n';
 	};
 
-	print();
-
-	a = a + b;
-	print();
-
-	b = b * 2;
-	print();
-
-	std::cout << (a == b) << '\n';
+	print(a);
+	Vector2d c = a * 2.5;
+	print(c);
+	Vector2i b(a);
+	print(b);
+	std::cout << a * b << '\n';
 
 	return 0;
 }

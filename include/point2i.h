@@ -21,6 +21,4 @@ struct Point2i
     friend Point2i operator /(const Point2i& p1, const double k);
 };
 
-typedef Point2i Vector2i;
-
 #endif //__POINT2I_H__

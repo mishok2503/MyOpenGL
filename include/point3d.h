@@ -30,7 +30,4 @@ struct Point3d
 };
 
 
-typedef Point3d Vector3d;
-
-
 #endif // __POINT3D_H__
