@@ -1,16 +1,16 @@
 #include "tgaimage.h"
 
 #include <iostream>
-#include "point2i.h"
+#include "point3d.h"
 
 int main()
 {
-	Point2i a, b(3, 4);
+	Point3d a, b(3, 4, 5.5);
 
 	auto print = [&]()
 	{
-		std::cout << "a: " << a.x << ' ' << a.y << '\n';
-		std::cout << "b: " << b.x << ' ' << b.y << '\n';
+		std::cout << "a: " << a.x << ' ' << a.y << ' ' << a.z << '\n';
+		std::cout << "b: " << b.x << ' ' << b.y << ' ' << b.z << '\n';
 	};
 
 	print();
