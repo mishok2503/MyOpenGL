@@ -13,6 +13,7 @@ add_executable(main "src/main.cpp"
 	      "src/point2i.cpp" "include/point2i.h"
 	      "src/point3d.cpp" "include/point3d.h"
 	      "include/vector.h"
-	      "include/matrix.h")
+	      "include/matrix.h"
+	      "src/primitives.cpp" "include/primitives.h")
 
 target_include_directories(main PUBLIC "include" "src" "TGA library")
