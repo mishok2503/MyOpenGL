@@ -1,26 +1,33 @@
 #include "tgaimage.h"
 
 #include <iostream>
-#include "vector.h"
-#include "point3d.h"
+#include "matrix.h"
 
 int main()
 {
-	Vector2i a(1, 2);
+	Matrix<3, 3, double> a, b({{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
 
-	auto print = [](auto v)
-	{
-		for (size_t i=0; i < v.size(); ++i)
-			std::cout << v[i] << ' ';
-		std::cout << '\n';
+	auto print = [](const auto& m) {
+		for (size_t i=0; i < m.size().x; ++i)
+		{
+			for (size_t j=0; j < m.size()[1]; ++j)
+				std::cout << m[i][j] << ' ';
+			std::cout << '\n';
+		}
 	};
 
-	print(a);
-	Vector2d c = a * 2.5;
-	print(c);
-	Vector2i b(a);
 	print(b);
-	std::cout << a * b << '\n';
+
+	a = b * 2;
+	print(a);
+
+	std::cout << a.det() << '\n';
+
+	b = a + b;
+	print(b);
+	
+	a = a * b;
+	print(a);
 
 	return 0;
 }
