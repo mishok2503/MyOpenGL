@@ -6,8 +6,24 @@
 #include <string>
 
 #include "vector.h"
+#include "point3d.h"
 
 namespace {
+
+Matrix<4, 4, double> lookat(Point3d eye, Point3d center, Point3d up) {
+	Point3d z = eye - center;
+	Point3d x = up.cross(z);
+	Point3d y = z.cross(x);
+	x.normalize();y.normalize();z.normalize();
+	Matrix<4, 4, double> res({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
+	for (int i=0; i<3; i++) {
+	    res[0][i] = x[i];
+	    res[1][i] = y[i];
+	    res[2][i] = z[i];
+	    res[i][3] = -center[i];
+	}
+	return res;
+	}
 
 double triangle_area(const Vector2i& a, const Vector2i& b, const Vector2i& c)
 {
@@ -31,8 +47,7 @@ void Model::triangle(TGAImage& image, int face_num, std::vector< std::vector<dou
     for (int i=0; i < 3; ++i)
     {
         P[i] = point[face[face_num].point[i]];
-        p[i] = {(int)((P[i][0] + 1) * image.get_width() / 2), (int)((P[i][1] + 1) * image.get_height() / 2)};
-        // p[i] = world_to_screen(P[i], image);
+        p[i] = world_to_screen(P[i], image);
         texture_p[i] = texture[face[face_num].texture[i]];
     }
 
@@ -175,27 +190,28 @@ void Model::render(TGAImage& image)
 
 
 
-////////////////////////////////////////////
-// Matrix<4, 4, double> viewport(int x, int y, int w, int h) {
-//     Matrix<4, 4, double> m({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
-//     int depth = 255;
-//     m[0][3] = x+w/2.f;
-//     m[1][3] = y+h/2.f;
-//     m[2][3] = depth/2.f;
+Matrix<4, 4, double> viewport(int x, int y, int w, int h) {
+    Matrix<4, 4, double> m({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
+    int depth = 255;
+    m[0][3] = x+w/2.f;
+    m[1][3] = y+h/2.f;
+    m[2][3] = depth/2.f;
 
-//     m[0][0] = w/2.f;
-//     m[1][1] = h/2.f;
-//     m[2][2] = depth/2.f;
-//     return m;
-// }
+    m[0][0] = w/2.f;
+    m[1][1] = h/2.f;
+    m[2][2] = depth/2.f;
+    return m;
+}
 
-// Vector2i Model::world_to_screen(Vector3d& p, TGAImage& image)
-// {
-//     int width = image.get_width();
-//     int height = image.get_height();
-//     Matrix<4, 4, double> vp = viewport(width/8, height/8, width*3/4, height*3/4);
-//     Matrix<4, 4, double> pr({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, -1 / 2, 1}});
-//     Matrix<4, 1, double> P({{p.x}, {p.y}, {p.z}, {1}});
-//     P = vp * pr * P;
-//     return Vector2i(P[0][0] / P[3][0], P[1][0] / P[3][0]);
-// }
+Vector2i Model::world_to_screen(Vector3d& p, TGAImage& image)
+{
+	double c = 4;
+    int width = image.get_width();
+    int height = image.get_height();
+    Matrix<4, 4, double> vp = viewport(width/8, height/8, width*3/4, height*3/4);
+ 	Matrix<4, 4, double> lt = lookat({1, 1, 3}, {0, 0, 0}, {1, 1, 0});
+    Matrix<4, 4, double> pr({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, -1 / c, 1}});
+    Matrix<4, 1, double> P({{p.x}, {p.y}, {p.z}, {1}});
+    P = vp * pr * lt * P;
+    return Vector2i(P[0][0] / P[3][0], P[1][0] / P[3][0]);
+}

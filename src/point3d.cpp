@@ -5,6 +5,16 @@ Point3d::Point3d() : x(0), y(0), z(0) {}
 
 Point3d::Point3d(double x, double y, double z) : x(x), y(y), z(z) {}
 
+double& Point3d::operator [](size_t i)
+{
+	return i == 0 ? x : (i == 1 ? y : z);
+}
+
+const double& Point3d::operator [](size_t i) const
+{
+	return i == 0 ? x : (i == 1 ? y : z);
+}
+
 bool operator <(const Point3d& p1, const Point3d& p2)
 {
     return p1.x == p2.y ? (p1.y == p2.y ? p1.z < p2.z : p1.y < p2.y) : p1.x < p2.x;
