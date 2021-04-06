@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.4)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,6 +13,7 @@ add_executable(main "src/main.cpp"
 	      "src/point3d.cpp" "include/point3d.h"
 	      "include/vector.h"
 	      "include/matrix.h"
-	      "src/primitives.cpp" "include/primitives.h")
+	      "src/primitives.cpp" "include/primitives.h"
+	      "src/model.cpp" "include/model.h")
 
 target_include_directories(main PUBLIC "include" "src" "TGA library")
