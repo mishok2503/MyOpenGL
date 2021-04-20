@@ -6,14 +6,13 @@
 #include <string>
 
 #include "vector.h"
-#include "point3d.h"
 
 namespace {
 
-Matrix<4, 4, double> lookat(Point3d eye, Point3d center, Point3d up) {
-	Point3d z = eye - center;
-	Point3d x = up.cross(z);
-	Point3d y = z.cross(x);
+Matrix<4, 4, double> lookat(Vector3d eye, Vector3d center, Vector3d up) {
+	Vector3d z = eye - center;
+	Vector3d x = up ^ z;
+	Vector3d y = z ^ x;
 	x.normalize();y.normalize();z.normalize();
 	Matrix<4, 4, double> res({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
 	for (int i=0; i<3; i++) {
@@ -51,49 +50,46 @@ void Model::triangle(TGAImage& image, int face_num, std::vector< std::vector<dou
         texture_p[i] = texture[face[face_num].texture[i]];
     }
 
-    // if (!is_in_line(p[0], p[1], p[2]))
-    // {
-        Vector2i lb(image.get_width() - 1, image.get_height() - 1);
-        Vector2i rt(0, 0);
-        for (int i=0; i < 3; ++i)
-        {
-            lb.x = std::min(lb.x, p[i].x);
-            lb.y = std::min(lb.y, p[i].y);
-            rt.x = std::max(rt.x, p[i].x);
-            rt.y = std::max(rt.y, p[i].y);
-        }
+    Vector2i lb(image.get_width() - 1, image.get_height() - 1);
+    Vector2i rt(0, 0);
+    for (int i=0; i < 3; ++i)
+    {
+        lb.x = std::min(lb.x, p[i].x);
+        lb.y = std::min(lb.y, p[i].y);
+        rt.x = std::max(rt.x, p[i].x);
+        rt.y = std::max(rt.y, p[i].y);
+    }
 
-        double area = triangle_area(p[0], p[1], p[2]);
-        Vector2i pt;
-        for (pt.x = lb.x; pt.x < rt.x; ++pt.x)
+    double area = triangle_area(p[0], p[1], p[2]);
+    Vector2i pt;
+    for (pt.x = lb.x; pt.x < rt.x; ++pt.x)
+    {
+        for (pt.y = lb.y; pt.y < rt.y; ++pt.y)
         {
-            for (pt.y = lb.y; pt.y < rt.y; ++pt.y)
+            Vector3d bc = barycentric2d(p[0], p[1], p[2], pt, area);
+
+            if (bc.x >= 0 && bc.y >= 0 && bc.z >= 0)
             {
-                Vector3d bc = barycentric2d(p[0], p[1], p[2], pt, area);
-
-                if (bc.x >= 0 && bc.y >= 0 && bc.z >= 0)
+                double z = P[0].z * bc.x + P[1].z * bc.y + P[2].z * bc.z; // TODO: v * v
+                if (z > zbuffer[pt.x][pt.y])
                 {
-                    double z = P[0].z * bc.x + P[1].z * bc.y + P[2].z * bc.z; // TODO: v * v
-                    if (z > zbuffer[pt.x][pt.y])
-                    {
-                        zbuffer[pt.x][pt.y] = z;
-                        double xd = Vector3d(texture_p[0].x, texture_p[1].x, texture_p[2].x) * bc;
-                        double yd = Vector3d(texture_p[0].y, texture_p[1].y, texture_p[2].y) * bc;
-                        TGAColor color = diffusemap.get(xd * diffusemap.get_width() + 0.5, diffusemap.get_height() * yd + 0.5);
-                        TGAColor nc = normalsmap.get(xd * normalsmap.get_width() + 0.5, normalsmap.get_height() * yd + 0.5);
-                        Vector3d n(nc.r, nc.g, nc.b);
-                        n.normalize();
-                        double intensivity = n * light;
-                        color.r *= intensivity;
-				        color.g *= intensivity;
-				        color.b *= intensivity;
-                        image.set(pt.x, pt.y, color);
-                    }
+                    zbuffer[pt.x][pt.y] = z;
+                    double xd = Vector3d(texture_p[0].x, texture_p[1].x, texture_p[2].x) * bc;
+                    double yd = Vector3d(texture_p[0].y, texture_p[1].y, texture_p[2].y) * bc;
+                    TGAColor color = diffusemap.get(xd * diffusemap.get_width() + 0.5, diffusemap.get_height() * yd + 0.5);
+                    TGAColor nc = normalsmap.get(xd * normalsmap.get_width() + 0.5, normalsmap.get_height() * yd + 0.5);
+                    Vector3d n(nc.r, nc.g, nc.b);
+                    n.normalize();
+                    double intensivity = n * light;
+                    color.r *= intensivity;
+			        color.g *= intensivity;
+			        color.b *= intensivity;
+                    image.set(pt.x, pt.y, color);
                 }
             }
         }
+    }
 
-    // }
 }
 
 Model::Model(const std::string& path)

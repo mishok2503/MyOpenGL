@@ -3,9 +3,9 @@
 #include <cmath>
 
 #include "tgaimage.h"
-#include "point2i.h"
+#include "vector.h"
 
-void line(TGAImage& image, Point2i p1, Point2i p2, const TGAColor& color)
+void line(TGAImage& image, Vector2i p1, Vector2i p2, const TGAColor& color)
 {
     bool swp_xy = std::abs(p1.x - p2.x) < std::abs(p1.y - p2.y);
     if (swp_xy)

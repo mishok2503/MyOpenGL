@@ -2,8 +2,8 @@
 #define __PRIMITIVES_H__
 
 #include "tgaimage.h"
-#include "point2i.h"
+#include "vector.h"
 
-void line(TGAImage& image, Point2i p1, Point2i p2, const TGAColor& color);
+void line(TGAImage& image, Vector2i p1, Vector2i p2, const TGAColor& color);
 
 #endif // __PRIMITIVES_H__

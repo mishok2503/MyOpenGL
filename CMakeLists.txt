@@ -9,8 +9,6 @@ string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror")
 
 add_executable(main "src/main.cpp"
 	      "TGA library/tgaimage.cpp" "TGA library/tgaimage.h"
-	      "src/point2i.cpp" "include/point2i.h"
-	      "src/point3d.cpp" "include/point3d.h"
 	      "include/vector.h"
 	      "include/matrix.h"
 	      "src/primitives.cpp" "include/primitives.h"
