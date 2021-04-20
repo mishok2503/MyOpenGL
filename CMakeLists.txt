@@ -11,7 +11,6 @@ add_executable(main "src/main.cpp"
 	      "TGA library/tgaimage.cpp" "TGA library/tgaimage.h"
 	      "include/vector.h"
 	      "include/matrix.h"
-	      "src/primitives.cpp" "include/primitives.h"
 	      "src/model.cpp" "include/model.h")
 
 target_include_directories(main PUBLIC "include" "src" "TGA library")

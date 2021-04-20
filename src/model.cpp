@@ -65,8 +65,7 @@ Vector2i Model::world_to_screen(Vector3d &p, TGAImage &image) {
 }
 
 void Model::triangle(TGAImage &image, int face_num,
-                     std::vector<std::vector<double>> &zbuffer,
-                     const Vector3d &light) {
+                     std::vector<std::vector<double>> &zbuffer) {
   Vector3d world[3], texture_p[3];
   Vector2i screen[3];
   for (int i = 0; i < 3; ++i) {
@@ -103,6 +102,8 @@ void Model::triangle(TGAImage &image, int face_num,
           Vector3d n(nc.r, nc.g, nc.b);
           n.normalize();
           double intensivity = n * light;
+          if (intensivity < 0)
+          	continue;
           color.r *= intensivity;
           color.g *= intensivity;
           color.b *= intensivity;
@@ -177,10 +178,14 @@ bool Model::load_texture(const std::string &file, const std::string type) {
 }
 
 void Model::render(TGAImage &image) {
-  Vector3d light(0, 0, 1);
   std::vector<std::vector<double>> zbuffer(
       image.get_width(), std::vector<double>(image.get_height(), -1000));
 
   for (size_t i = 0; i < face.size(); ++i)
-    triangle(image, i, zbuffer, light);
+    triangle(image, i, zbuffer);
+}
+
+void Model::set_light(const Vector3d& light) {
+	this->light = light;
+	this->light.normalize();
 }
