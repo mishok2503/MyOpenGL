@@ -26,17 +26,17 @@ Vector3d barycentric2d(const Vector2i &a, const Vector2i &b, const Vector2i &c,
 Matrix<4, 4, double> Model::viewport(int w, int h) {
   Matrix<4, 4, double> m(1);
   int depth = 255;
-  m[0][3] = w / 2.f;
-  m[1][3] = h / 2.f;
-  m[2][3] = depth / 2.f;
+  m[0][3] = w / 2.0;
+  m[1][3] = h / 2.0;
+  m[2][3] = depth / 2.0;
 
-  m[0][0] = w * 3 / 8.f;
-  m[1][1] = h * 3 / 8.f;
-  m[2][2] = depth / 2.f;
+  m[0][0] = w * 3 / 8.0;
+  m[1][1] = h * 3 / 8.0;
+  m[2][2] = depth / 2.0;
   return m;
 }
 
-Matrix<4, 4, double> Model::lookat(Vector3d eye, Vector3d center, Vector3d up) {
+Matrix<4, 4, double> Model::lookat(Vector3d center) {
   Vector3d z = eye - center;
   Vector3d x = up ^ z;
   Vector3d y = z ^ x;
@@ -56,7 +56,7 @@ Matrix<4, 4, double> Model::lookat(Vector3d eye, Vector3d center, Vector3d up) {
 Vector2i Model::world_to_screen(Vector3d &p, TGAImage &image) {
   double c = 4;
   Matrix<4, 4, double> vp = viewport(image.get_width(), image.get_height());
-  Matrix<4, 4, double> lt = lookat({1, 1, 3}, {0, 0, 0}, {1, 1, 0});
+  Matrix<4, 4, double> lt = lookat({-0.4, 0, 0});
   Matrix<4, 4, double> pr(
       {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, -1 / c, 1}});
   Matrix<4, 1, double> world({{p.x}, {p.y}, {p.z}, {1}});
@@ -69,7 +69,7 @@ void Model::triangle(TGAImage &image, int face_num,
   Vector3d world[3], texture_p[3];
   Vector2i screen[3];
   for (int i = 0; i < 3; ++i) {
-    world[i] = point[face[face_num].point[i]];
+    world[i] = point[face[face_num].point[i]] / max_cord;
     screen[i] = world_to_screen(world[i], image);
     texture_p[i] = texture[face[face_num].texture[i]];
   }
@@ -77,10 +77,12 @@ void Model::triangle(TGAImage &image, int face_num,
   Vector2i lb(image.get_width() - 1, image.get_height() - 1), rt(0, 0);
   for (int i = 0; i < 3; ++i) {
   	for (int j=0; j < 2; ++j) {
-    lb[j] = std::min(lb[j], screen[i][j]);
-    rt[j] = std::max(rt[j], screen[i][j]);
+	  lb[j] = std::min(lb[j], screen[i][j]);
+      rt[j] = std::max(rt[j], screen[i][j]);
 	}
   }
+
+  int num = face[face_num].texture_num;
 
   double area = triangle_area(screen[0], screen[1], screen[2]);
   for (Vector2i pt(lb.x, 0); pt.x < rt.x; ++pt.x) {
@@ -95,10 +97,10 @@ void Model::triangle(TGAImage &image, int face_num,
               Vector3d(texture_p[0].x, texture_p[1].x, texture_p[2].x) * bc;
           double yd =
               Vector3d(texture_p[0].y, texture_p[1].y, texture_p[2].y) * bc;
-          TGAColor color = diffusemap.get(xd * diffusemap.get_width() + 0.5,
-                                          diffusemap.get_height() * yd + 0.5);
-          TGAColor nc = normalsmap.get(xd * normalsmap.get_width() + 0.5,
-                                       normalsmap.get_height() * yd + 0.5);
+          TGAColor color = diffusemap[num].get(xd * diffusemap[num].get_width() + 0.5,
+                                          diffusemap[num].get_height() * yd + 0.5);
+          TGAColor nc = normalsmap[num].get(xd * normalsmap[num].get_width() + 0.5,
+                                       normalsmap[num].get_height() * yd + 0.5);
           Vector3d n(nc.r, nc.g, nc.b);
           n.normalize();
           double intensivity = n * light;
@@ -124,15 +126,23 @@ bool Model::load_from_file(const std::string &path) {
     return false;
   }
 
+  int num = 0;
   char t;
   std::string line;
   while (!ifs.eof()) {
     std::getline(ifs, line);
     std::istringstream iss(line.c_str());
 
+    if (line == "usemtl Shumikha_Weapon")
+    	num = 0;
+    if (line == "usemtl Shumikha_Ammo")
+    	num = 1;
+
     if (line.compare(0, 2, "v ") == 0) {
       Vector3d p;
       iss >> t >> p.x >> p.y >> p.z;
+      max_cord = std::max(std::abs(p.x), std::max(std::abs(p.y),
+      						std::max(std::abs(p.z), max_cord)));
 
       point.push_back(p);
     } else if (line.compare(0, 3, "vt ") == 0) {
@@ -156,6 +166,7 @@ bool Model::load_from_file(const std::string &path) {
         f.texture[i]--;
         f.normal[i]--;
       }
+      f.texture_num = num;
 
       face.push_back(f);
     }
@@ -165,15 +176,15 @@ bool Model::load_from_file(const std::string &path) {
   return true;
 }
 
-bool Model::load_texture(const std::string &file, const std::string type) {
+bool Model::load_texture(const std::string &path, const std::string& type, size_t num) {
   TGAImage t;
-  if (!t.read_tga_file(file.c_str()))
+  if (!t.read_tga_file(path.c_str()))
     return false;
   t.flip_vertically();
   if (type == "texture")
-    diffusemap = t;
+    diffusemap[num] = t;
   if (type == "normals")
-    normalsmap = t;
+    normalsmap[num] = t;
   return true;
 }
 
@@ -188,4 +199,13 @@ void Model::render(TGAImage &image) {
 void Model::set_light(const Vector3d& light) {
 	this->light = light;
 	this->light.normalize();
+}
+
+void Model::set_up(const Vector3d& up) {
+	this->up = up;
+	this->up.normalize();
+}
+
+void Model::set_eye(const Vector3d& eye) {
+	this->eye = eye;
 }

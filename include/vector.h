@@ -10,8 +10,7 @@ private:
 
 public:
   Vector() {
-    for (size_t i = dim; i--; data[i] = T())
-      ;
+    for (size_t i = dim; i--; data[i] = T());
   }
 
   T &operator[](size_t i) {
@@ -71,39 +70,34 @@ public:
 
 template <size_t dim, typename T>
 Vector<dim, T> operator+(Vector<dim, T> left, const Vector<dim, T> &right) {
-  for (size_t i = dim; i--; left[i] += right[i])
-    ;
+  for (size_t i = dim; i--; left[i] += right[i]);
   return left;
 }
 
 template <size_t dim, typename T>
 Vector<dim, T> operator-(Vector<dim, T> left, const Vector<dim, T> &right) {
-  for (size_t i = dim; i--; left[i] -= right[i])
-    ;
+  for (size_t i = dim; i--; left[i] -= right[i]);
   return left;
 }
 
 template <size_t dim, typename T>
 T operator*(const Vector<dim, T> &left, const Vector<dim, T> &right) {
   T res = T();
-  for (size_t i = dim; i--; res += left[i] * right[i])
-    ;
+  for (size_t i = dim; i--; res += left[i] * right[i]);
   return res;
 }
 
 template <size_t dim, typename T>
 Vector<dim, double> operator*(const Vector<dim, T> &left, const double right) {
   Vector<dim, double> res;
-  for (size_t i = dim; i--; res[i] = left[i] * right)
-    ;
+  for (size_t i = dim; i--; res[i] = left[i] * right);
   return res;
 }
 
 template <size_t dim, typename T>
 Vector<dim, double> operator/(const Vector<dim, T> &left, const double right) {
   Vector<dim, double> res;
-  for (size_t i = dim; i--; res[i] = left[i] / right)
-    ;
+  for (size_t i = dim; i--; res[i] = left[i] / right);
   return res;
 }
 
