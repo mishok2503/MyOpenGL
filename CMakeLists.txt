@@ -7,10 +7,10 @@ project(MyOpenGl)
 
 string(APPEND CMAKE_CXX_FLAGS " -Wall -Werror")
 
-add_executable(main "src/main.cpp"
+add_executable(render "src/main.cpp"
 	      "TGA library/tgaimage.cpp" "TGA library/tgaimage.h"
 	      "include/vector.h"
 	      "include/matrix.h"
 	      "src/model.cpp" "include/model.h")
 
-target_include_directories(main PUBLIC "include" "src" "TGA library")
+target_include_directories(render PUBLIC "include" "src" "TGA library")
