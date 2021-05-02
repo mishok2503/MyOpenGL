@@ -13,7 +13,6 @@ private:
     std::vector<int> point = std::vector<int>(3);
     std::vector<int> texture = std::vector<int>(3);
     std::vector<int> normal = std::vector<int>(3);
-    int texture_num = 0;
   };
 
   std::vector<Vector3d> point, texture, normal;
@@ -23,8 +22,10 @@ private:
   Vector3d eye = {1, 1, 1};
   Vector3d up = {0, 1, 0};
 
-  TGAImage diffusemap[2];
-  TGAImage normalsmap[2];
+  TGAImage diffusemap;
+  bool has_diffusemap = false;
+  TGAImage normalsmap;
+  bool has_normalsmap = false;
 
   double max_cord = 0;
 
@@ -35,10 +36,11 @@ private:
   Matrix<4, 4, double> lookat(Vector3d center);
 
 public:
-  Model(const std::string &);
+  Model() = default;
+  Model(const std::string &path);
 
   bool load_from_file(const std::string &path);
-  bool load_texture(const std::string &path, const std::string& type, size_t num);
+  bool load_texture(const std::string &path, const std::string& type);
   void render(TGAImage &image);
   void set_light(const Vector3d& light);
   void set_up(const Vector3d& up);
