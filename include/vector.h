@@ -69,6 +69,13 @@ public:
 };
 
 template <size_t dim, typename T>
+bool operator==(const Vector<dim, T>& left, const Vector<dim, T> &right) {
+  bool res = true;
+  for (size_t i=dim; i-- && res; res &= left[i] == right[i]);
+  return res;
+}
+
+template <size_t dim, typename T>
 Vector<dim, T> operator+(Vector<dim, T> left, const Vector<dim, T> &right) {
   for (size_t i = dim; i--; left[i] += right[i]);
   return left;
